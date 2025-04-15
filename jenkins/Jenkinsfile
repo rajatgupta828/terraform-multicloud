@@ -1,0 +1,34 @@
+# Jenkinsfile (simplified)
+pipeline {
+  agent any
+
+  environment {
+    TF_VAR_env = "${ENV}"
+  }
+
+  parameters {
+    string(name: 'ENV', defaultValue: 'dev', description: 'Environment to deploy')
+    choice(name: 'CLOUD', choices: ['aws', 'azure', 'gcp'], description: 'Cloud provider')
+  }
+
+  stages {
+    stage('Init') {
+      steps {
+        sh "cd envs/${ENV}/${CLOUD} && terraform init"
+      }
+    }
+    stage('Plan') {
+      steps {
+        sh "cd envs/${ENV}/${CLOUD} && terraform plan -var-file=terraform.tfvars"
+      }
+    }
+    stage('Apply') {
+      when {
+        expression { return params.ENV != 'prod' } // Add approval for prod
+      }
+      steps {
+        sh "cd envs/${ENV}/${CLOUD} && terraform apply -auto-approve -var-file=terraform.tfvars"
+      }
+    }
+  }
+}
