@@ -1,2 +1,6 @@
 **/.terraform/q.terraform/
 .terraform/
+.idea
+all-files.txt
+*.tfstate
+*.hcl
