@@ -1,5 +1,5 @@
 provider "aws" {
-  region = "ap-south-1"
+  region = "us-west-2"
 }
 
 module "networking" {
@@ -7,7 +7,8 @@ module "networking" {
 
   vpc_name             = var.vpc_name
   vpc_cidr             = var.vpc_cidr
-  public_subnet_cidrs  = var.public_subnet_cidrs
+  region               = var.region
   private_subnet_cidrs = var.private_subnet_cidrs
-  azs                  = var.azs
+  public_subnet_cidrs  = var.public_subnet_cidrs
+  azs = var.azs
 }

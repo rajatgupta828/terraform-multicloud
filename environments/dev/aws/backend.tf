@@ -1,7 +1,7 @@
 terraform {
   backend "s3" {
-    bucket = "rajat-dev-terraform-aws"
+    bucket = "741018200149-terraform-resources1"
     key    = "dev/aws/terraform.tfstate"
-    region = "ap-south-1"
+    region = "us-west-2"
   }
 }
