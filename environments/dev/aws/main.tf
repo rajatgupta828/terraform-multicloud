@@ -1,9 +1,15 @@
 provider "aws" {
-  region = "us-west-2"
+  alias   = "dev"
+  region  = var.aws_region
+  profile = var.aws_profile
 }
 
-module "networking" {
+
+module "networking_dev" {
   source = "../../../modules/networking"
+  providers = {
+    aws = aws.dev
+  }
 
   vpc_name             = var.vpc_name
   vpc_cidr             = var.vpc_cidr
@@ -11,4 +17,12 @@ module "networking" {
   private_subnet_cidrs = var.private_subnet_cidrs
   public_subnet_cidrs  = var.public_subnet_cidrs
   azs = var.azs
+}
+
+module "compute" {
+  source            = "../../../modules/compute"
+  public_subnet_ids = module.networking_dev.public_subnet_ids
+  private_subnet_ids = module.networking_dev.private_subnet_ids
+  vpc_id            = module.networking_dev.vpc_id
+  bastion_sg_id = ""
 }
