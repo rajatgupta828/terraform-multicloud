@@ -1,9 +1,3 @@
-
-#Provider to be used
-provider "aws" {
-  region = var.region
-}
-
 # VPC
 resource "aws_vpc" "main" {
   cidr_block = var.vpc_cidr
@@ -24,12 +18,26 @@ resource "aws_internet_gateway" "igw" {
 
 #Public Subnet
 resource "aws_subnet" "public" {
+  count             = length(var.azs) # Create a public subnet in each availability zone
   vpc_id            = aws_vpc.main.id
-  cidr_block        = var.public_subnet_cidrs
+  cidr_block        = var.public_subnet_cidrs[count.index]
+  availability_zone = var.azs[count.index]
   map_public_ip_on_launch = true
 
   tags = {
-    Name = "${var.vpc_name}-Public Subnet"
+    Name = "${var.vpc_name}-Public-${var.azs[count.index]}"
+  }
+}
+
+# Private Subnet
+resource "aws_subnet" "private" {
+  count             = length(var.azs) # Create a public subnet in each availability zone
+  vpc_id            = aws_vpc.main.id
+  cidr_block        = var.public_subnet_cidrs[count.index]
+  availability_zone = var.azs[0]
+
+  tags = {
+    Name = "${var.vpc_name}-Private-${var.azs[count.index]}"
   }
 }
 
@@ -43,26 +51,13 @@ resource "aws_eip" "nat" {
 # NAT Gateway
 resource "aws_nat_gateway" "nat" {
   allocation_id = aws_eip.nat.id
-  subnet_id     = aws_subnet.public.id
+  subnet_id     = aws_subnet.public[0].id
 
   tags = {
     Name = "${var.vpc_name}-NAT-Gateway"
   }
 
   depends_on = [aws_internet_gateway.igw]
-}
-
-
-
-# Private Subnet
-resource "aws_subnet" "private" {
-  vpc_id            = aws_vpc.main.id
-  cidr_block        = var.private_subnet_cidrs
-  availability_zone = var.azs[0]
-
-  tags = {
-    Name = "${var.vpc_name}-Private-Subnet"
-  }
 }
 
 # Public Route Table
@@ -80,7 +75,8 @@ resource "aws_route_table" "public" {
 }
 
 resource "aws_route_table_association" "public" {
-  subnet_id      = aws_subnet.public.id
+  count          = length(var.azs)
+  subnet_id      = aws_subnet.public[count.index].id
   route_table_id = aws_route_table.public.id
 }
 
@@ -99,6 +95,31 @@ resource "aws_route_table" "private" {
 }
 
 resource "aws_route_table_association" "private" {
-  subnet_id      = aws_subnet.private.id
+  count          = length(var.azs)
+  subnet_id      = aws_subnet.private[count.index].id
   route_table_id = aws_route_table.private.id
+}
+
+# Securoty group for bastion
+resource "aws_security_group" "bastion" {
+  name   = "${var.vpc_name}-bastion-sg"
+  vpc_id = aws_vpc.main.id
+
+  ingress {
+    from_port   = 22
+    to_port     = 22
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  egress {
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  tags = {
+    Name = "${var.vpc_name}-bastion-sg"
+  }
 }
