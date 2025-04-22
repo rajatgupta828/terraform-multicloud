@@ -33,8 +33,8 @@ resource "aws_subnet" "public" {
 resource "aws_subnet" "private" {
   count             = length(var.azs) # Create a public subnet in each availability zone
   vpc_id            = aws_vpc.main.id
-  cidr_block        = var.public_subnet_cidrs[count.index]
-  availability_zone = var.azs[0]
+  cidr_block        = var.private_subnet_cidrs[count.index]
+  availability_zone = var.azs[count.index]
 
   tags = {
     Name = "${var.vpc_name}-Private-${var.azs[count.index]}"
