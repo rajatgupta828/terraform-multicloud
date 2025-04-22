@@ -28,6 +28,7 @@ variable "region" {
 variable "aws_region" {
   description = "AWS region to deploy to"
   type        = string
+  default     = "ap-south-1"  # or your desired region
 }
 
 variable "aws_profile" {

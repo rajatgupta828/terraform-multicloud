@@ -1,7 +1,6 @@
 provider "aws" {
   alias   = "dev"
   region  = var.aws_region
-  profile = var.aws_profile
 }
 
 
@@ -24,5 +23,5 @@ module "compute" {
   public_subnet_ids = module.networking_dev.public_subnet_ids
   private_subnet_ids = module.networking_dev.private_subnet_ids
   vpc_id            = module.networking_dev.vpc_id
-  bastion_sg_id = ""
+  bastion_sg_id = module.networking_dev.bastion_sg_id
 }
