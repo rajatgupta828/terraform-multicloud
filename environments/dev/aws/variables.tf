@@ -31,9 +31,14 @@ variable "aws_region" {
   default     = "ap-south-1"  # or your desired region
 }
 
-variable "aws_profile" {
-  description = "AWS CLI profile to use"
+variable "linux_2_ami" {
+  type = string
+  description = "Linux 2 AMI id"
+}
+
+variable "bastion_instance_type" {
   type        = string
-  default     = "dev"
+  description = "Instance type for bastion host"
+  default     = "t2.micro"
 }
 

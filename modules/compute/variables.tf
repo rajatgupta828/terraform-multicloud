@@ -12,3 +12,14 @@ variable "instance_key" {
     default = "rajat-ssh-key"
 }
 variable "bastion_sg_id" {}
+
+variable "linux_2_ami" {
+  type = string
+  description = "Linux 2 AMI id"
+}
+
+variable "bastion_instance_type" {
+    type        = string
+    description = "Instance type for bastion host"
+    default     = "t2.micro"
+}
